@@ -13,7 +13,7 @@ exports.handler = async (event) => {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-        model: "mistralai/mistral-7b-instruct:free",
+        model: "openrouter/auto",
         messages: [{ role: "user", content: prompt }]
       })
     });
