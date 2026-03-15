@@ -6,21 +6,22 @@ exports.handler = async (event) => {
   try {
     const { prompt } = JSON.parse(event.body);
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      }
-    );
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-3.3-8b-instruct:free",
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
 
     const data = await response.json();
-    console.log("Respuesta Gemini:", JSON.stringify(data));
+    console.log("Respuesta OpenRouter:", JSON.stringify(data));
 
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || null;
+    const texto = data.choices?.[0]?.message?.content || null;
 
     return {
       statusCode: 200,
