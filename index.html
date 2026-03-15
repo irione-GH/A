@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta Cabalística · Árbol de la Vida</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --gold-dim: #8a6f32;
+      --ink: #0e0c0a;
+      --ink-soft: #1e1a14;
+      --parchment: #f5f0e8;
+      --parchment-dark: #ede5d4;
+      --text-main: #1a1410;
+      --text-muted: #5a4e3a;
+      --border: rgba(201,168,76,0.3);
+      --border-strong: rgba(201,168,76,0.6);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'EB Garamond', Georgia, serif;
+      background-color: var(--ink);
+      color: var(--parchment);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background stars */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(201,168,76,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(201,168,76,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, rgba(201,168,76,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 30%, rgba(201,168,76,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 55%, rgba(201,168,76,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40% 70%, rgba(201,168,76,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 80%, rgba(201,168,76,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 85%, rgba(201,168,76,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 90%, rgba(201,168,76,0.1) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeDown 0.8s ease both;
+    }
+
+    .star-of-david {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .header h1 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(18px, 4vw, 26px);
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+
+    .header .subtitle {
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      color: var(--gold-dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      opacity: 0.4;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--gold);
+    }
+    .divider span { color: var(--gold); font-size: 14px; }
+
+    /* Form card */
+    .form-card {
+      background: rgba(14,12,10,0.7);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem 1.75rem;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.8s ease 0.2s both;
+    }
+
+    .form-card h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+    }
+
+    input, select {
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: var(--parchment);
+      font-family: 'EB Garamond', serif;
+      font-size: 16px;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+
+    input::placeholder { color: rgba(245,240,232,0.25); }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--border-strong);
+    }
+
+    select option { background: var(--ink-soft); }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.7) sepia(1) saturate(2) hue-rotate(5deg);
+      opacity: 0.5;
+      cursor: pointer;
+    }
+
+    .btn-consult {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 14px 24px;
+      background: transparent;
+      border: 0.5px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--gold);
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-consult:hover {
+      background: rgba(201,168,76,0.08);
+      border-color: var(--gold);
+    }
+
+    .btn-consult:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .error-msg {
+      color: #e07070;
+      font-size: 14px;
+      font-style: italic;
+      text-align: center;
+      margin-top: 0.75rem;
+      display: none;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .loading-symbol {
+      font-size: 32px;
+      margin-bottom: 1rem;
+      animation: spin 4s linear infinite;
+      display: inline-block;
+      color: var(--gold);
+    }
+
+    .loading p {
+      color: var(--gold-dim);
+      font-style: italic;
+      font-size: 16px;
+    }
+
+    /* Results */
+    .result-panel {
+      display: none;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .result-identity {
+      text-align: center;
+      padding: 2rem 1rem 1.5rem;
+      border: 0.5px solid var(--border);
+      border-radius: 12px 12px 0 0;
+      background: rgba(201,168,76,0.04);
+      border-bottom: none;
+    }
+
+    .result-identity .name {
+      font-family: 'Cinzel', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gold-light);
+      margin-bottom: 4px;
+    }
+
+    .result-identity .meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-style: italic;
+      color: rgba(245,240,232,0.4);
+    }
+
+    .sefira-pill {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 14px;
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      color: var(--gold-dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* Number cards */
+    .numbers-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 0.5px solid var(--border);
+      border-top: none;
+      border-bottom: none;
+    }
+
+    .num-cell {
+      padding: 1.25rem 0.5rem;
+      text-align: center;
+      border-right: 0.5px solid var(--border);
+    }
+    .num-cell:last-child { border-right: none; }
+
+    .num-label {
+      font-family: 'Cinzel', serif;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-dim);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .num-value {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      display: block;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .num-desc {
+      font-size: 11px;
+      color: rgba(245,240,232,0.3);
+      font-style: italic;
+    }
+
+    /* Text body */
+    .result-body {
+      padding: 2rem 1.75rem;
+      border: 0.5px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      background: rgba(14,12,10,0.5);
+    }
+
+    .result-body p {
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--parchment);
+      margin-bottom: 1.25rem;
+    }
+
+    .result-body p:last-child { margin-bottom: 0; }
+
+    .result-body p:first-of-type::first-letter {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 48px;
+      float: left;
+      line-height: 0.85;
+      margin-right: 6px;
+      color: var(--gold);
+    }
+
+    .btn-nueva {
+      display: block;
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 12px;
+      background: transparent;
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--gold-dim);
+      font-family: 'Cinzel', serif;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-nueva:hover {
+      border-color: var(--border-strong);
+      color: var(--gold);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 12px;
+      color: rgba(245,240,232,0.15);
+      font-style: italic;
+      letter-spacing: 0.05em;
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+      .numbers-row { grid-template-columns: repeat(2, 1fr); }
+      .num-cell:nth-child(2) { border-right: none; }
+      .num-cell:nth-child(3) {
+        border-top: 0.5px solid var(--border);
+        border-right: 0.5px solid var(--border);
+      }
+      .num-cell:nth-child(4) { border-top: 0.5px solid var(--border); border-right: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="star-of-david">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="32,4 58,50 6,50" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.7"/>
+        <polygon points="32,60 6,14 58,14" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.7"/>
+        <circle cx="32" cy="32" r="4" fill="none" stroke="#c9a84c" stroke-width="0.8" opacity="0.5"/>
+      </svg>
+    </div>
+    <h1>Consulta Cabalística</h1>
+    <p class="subtitle">Árbol de la Vida · Numerología Sagrada · Sabiduría Ancestral</p>
+  </header>
+
+  <div class="form-card" id="formCard">
+    <h2>Datos para la consulta</h2>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Nombre completo</label>
+        <input type="text" id="nombre" placeholder="Ej: María Guadalupe López Hernández" />
+      </div>
+      <div class="form-group">
+        <label>Fecha de nacimiento</label>
+        <input type="date" id="fecha" />
+      </div>
+      <div class="form-group">
+        <label>Tipo de consulta</label>
+        <select id="tipo">
+          <option value="persona">Persona</option>
+          <option value="negocio">Negocio / Empresa</option>
+          <option value="relacion">Relación / Pareja</option>
+          <option value="proyecto">Proyecto / Idea</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Lugar de nacimiento / origen</label>
+        <input type="text" id="lugar" placeholder="Ej: Durango, México" />
+      </div>
+    </div>
+    <button class="btn-consult" id="btnConsultar" onclick="consultar()">
+      Abrir el Árbol de la Vida
+    </button>
+    <p class="error-msg" id="errorMsg">Por favor completa todos los campos antes de continuar.</p>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="loading-symbol">✦</div>
+    <p>Consultando la sabiduría de las Sefirot...</p>
+  </div>
+
+  <div class="result-panel" id="resultado">
+    <div class="result-identity">
+      <div class="name" id="resNombre"></div>
+      <div class="meta" id="resMeta"></div>
+      <div class="sefira-pill" id="resSefira"></div>
+    </div>
+
+    <div class="numbers-row">
+      <div class="num-cell">
+        <span class="num-label">Vida</span>
+        <span class="num-value" id="nVida">—</span>
+        <span class="num-desc">Camino</span>
+      </div>
+      <div class="num-cell">
+        <span class="num-label">Destino</span>
+        <span class="num-value" id="nNombre">—</span>
+        <span class="num-desc">Nombre</span>
+      </div>
+      <div class="num-cell">
+        <span class="num-label">Alma</span>
+        <span class="num-value" id="nAlma">—</span>
+        <span class="num-desc">Impulso</span>
+      </div>
+      <div class="num-cell">
+        <span class="num-label">Karma</span>
+        <span class="num-value" id="nPersona">—</span>
+        <span class="num-desc">Lección</span>
+      </div>
+    </div>
+
+    <div class="result-body">
+      <div id="resTexto"></div>
+    </div>
+
+    <button class="btn-nueva" onclick="nuevaConsulta()">← Nueva consulta</button>
+  </div>
+
+  <footer class="footer">
+    <div class="divider"><span>✦</span></div>
+    <p>La sabiduría cabalística es una guía espiritual, no un sustituto de decisiones personales.</p>
+  </footer>
+
+</div>
+
+<script>
+  const PITAGORAS = {
+    A:1,B:2,C:3,D:4,E:5,F:6,G:7,H:8,I:9,
+    J:1,K:2,L:3,M:4,N:5,O:6,P:7,Q:8,R:9,
+    S:1,T:2,U:3,V:4,W:5,X:6,Y:7,Z:8,
+    Á:1,É:5,Í:9,Ó:6,Ú:3,Ü:3,Ñ:5
+  };
+
+  const VOCALES = new Set(['A','E','I','O','U','Á','É','Í','Ó','Ú']);
+
+  const SEFIROT = {
+    1:'Keter — La Corona',2:'Chokhmah — La Sabiduría',3:'Binah — La Comprensión',
+    4:'Chesed — La Misericordia',5:'Gevurah — La Fuerza',6:'Tiferet — La Belleza',
+    7:'Netzach — La Victoria',8:'Hod — El Esplendor',9:'Yesod — El Fundamento',
+    11:'Número Maestro 11 — El Iluminado',22:'Número Maestro 22 — El Constructor',
+    33:'Número Maestro 33 — El Maestro Compasivo'
+  };
+
+  function reducir(n) {
+    if ([11,22,33].includes(n)) return n;
+    while (n > 9) {
+      n = String(n).split('').reduce((a,d) => a + parseInt(d), 0);
+      if ([11,22,33].includes(n)) return n;
+    }
+    return n;
+  }
+
+  function calcLetra(texto, soloV=false, soloC=false) {
+    const letras = texto.toUpperCase().replace(/[^A-ZÁÉÍÓÚÜÑ]/g,'');
+    let suma = 0;
+    for (const l of letras) {
+      const esV = VOCALES.has(l);
+      if (soloV && !esV) continue;
+      if (soloC && esV) continue;
+      suma += PITAGORAS[l] || 0;
+    }
+    return reducir(suma);
+  }
+
+  function calcFecha(f) {
+    const [a,m,d] = f.split('-').map(Number);
+    const sAnio = String(a).split('').reduce((s,x)=>s+parseInt(x),0);
+    return reducir(d + m + sAnio);
+  }
+
+  async function consultar() {
+    const nombre = document.getElementById('nombre').value.trim();
+    const fecha  = document.getElementById('fecha').value;
+    const tipo   = document.getElementById('tipo').value;
+    const lugar  = document.getElementById('lugar').value.trim();
+    const errEl  = document.getElementById('errorMsg');
+
+    errEl.style.display = 'none';
+    if (!nombre || !fecha || !lugar) {
+      errEl.style.display = 'block';
+      return;
+    }
+
+    const nVida    = calcFecha(fecha);
+    const nNombre  = calcLetra(nombre);
+    const nAlma    = calcLetra(nombre, true, false);
+    const nPersona = calcLetra(nombre, false, true);
+
+    document.getElementById('btnConsultar').disabled = true;
+    document.getElementById('formCard').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    const [a,m,d] = fecha.split('-');
+    const fechaFmt = `${d}/${m}/${a}`;
+
+    const tipoLabel = {persona:'Persona',negocio:'Negocio / Empresa',relacion:'Relación / Pareja',proyecto:'Proyecto / Idea'}[tipo];
+
+    const prompt = `Eres un maestro cabalista con profundo conocimiento de la Kabbalah hebrea, la numerología sagrada y el Árbol de la Vida (Etz Chaim). Realiza una lectura cabalística completa y muy personalizada en español.
+
+Datos:
+- Nombre: ${nombre}
+- Fecha de nacimiento: ${fechaFmt}
+- Lugar: ${lugar}
+- Tipo: ${tipoLabel}
+
+Números calculados (método de Pitágoras):
+- Número de Vida: ${nVida} → Sefirá: ${SEFIROT[nVida] || nVida}
+- Número del Nombre (Destino): ${nNombre}
+- Número del Alma (solo vocales): ${nAlma}
+- Número Kármico (solo consonantes): ${nPersona}
+
+Escribe 3 párrafos en español fluido y bello. Sin listas ni bullets:
+1. La esencia y misión de vida según el número ${nVida} y su Sefirá en el Árbol de la Vida. Incluye qué energía cósmica rige este camino.
+2. Los dones espirituales, talentos naturales y desafíos del alma según el número del nombre (${nNombre}) y el alma (${nAlma}). Conecta con el tipo de consulta: ${tipoLabel}.
+3. Un consejo práctico y espiritual para este momento. Menciona el lugar de origen (${lugar}) y cómo la energía del territorio influye. Finaliza con una frase de aliento poética.
+
+Usa lenguaje espiritual, poético y profundo. No repitas los números crudos, intégralos naturalmente en la narración.`;
+
+    try {
+      const res = await fetch('/.netlify/functions/kabbalah', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      const data = await res.json();
+      const texto = data.content?.[0]?.text || 'No se pudo obtener la lectura. Intenta de nuevo.';
+
+      document.getElementById('nVida').textContent    = nVida;
+      document.getElementById('nNombre').textContent  = nNombre;
+      document.getElementById('nAlma').textContent    = nAlma;
+      document.getElementById('nPersona').textContent = nPersona;
+
+      document.getElementById('resNombre').textContent = nombre;
+      document.getElementById('resMeta').textContent   = `${tipoLabel} · ${fechaFmt} · ${lugar}`;
+      document.getElementById('resSefira').textContent = SEFIROT[nVida] || `Número ${nVida}`;
+
+      const parrafos = texto.trim().split(/\n+/).filter(p => p.trim().length > 20);
+      document.getElementById('resTexto').innerHTML = parrafos.map(p => `<p>${p.trim()}</p>`).join('');
+
+      document.getElementById('loading').style.display  = 'none';
+      document.getElementById('resultado').style.display = 'block';
+
+    } catch(e) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('formCard').style.display = 'block';
+      document.getElementById('btnConsultar').disabled  = false;
+      const errEl = document.getElementById('errorMsg');
+      errEl.textContent = 'Error de conexión. Revisa tu configuración en Netlify.';
+      errEl.style.display = 'block';
+    }
+  }
+
+  function nuevaConsulta() {
+    document.getElementById('resultado').style.display = 'none';
+    document.getElementById('formCard').style.display  = 'block';
+    document.getElementById('btnConsultar').disabled   = false;
+    document.getElementById('nombre').value = '';
+    document.getElementById('fecha').value  = '';
+    document.getElementById('lugar').value  = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
